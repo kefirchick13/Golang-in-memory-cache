@@ -41,14 +41,18 @@ func (c *Cache) Get(key string) (interface{}, bool) {
 	defer c.mu.RUnlock()
 
 	if value, ok := c.items[key]; ok {
+		if value.expiration <= time.Now().UnixNano() {
+			delete(c.items, key)
+			return nil, false
+		}
 		return value, true
 	}
 	return nil, false
 }
 
 func (c *Cache) Delete(key string) bool {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	if _, ok := c.items[key]; ok {
 		delete(c.items, key)
@@ -71,7 +75,7 @@ func (c *Cache) evictExpired() {
 
 	now := time.Now().UnixNano()
 	for key, item := range c.items {
-		if item.expiration == now {
+		if item.expiration <= now {
 			delete(c.items, key)
 		}
 	}
