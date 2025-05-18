@@ -12,4 +12,4 @@
 ## 📦 Установка
 
 ```bash
-go get github.com/yourusername/simplecache
+go get github.com/yourusername/Golang-in-memory-cache
